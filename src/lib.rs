@@ -164,16 +164,16 @@ impl State {
                 let mut used = false;
                 let pressed = event.value == 1;
                 if event.code == left_bind {
-                    if pressed && !states.left && !find_keycodes {
-                        transmitter.send(1).unwrap();
+                    if !find_keycodes {
+                        transmitter.send(0 + pressed as i32).unwrap();
                     }
                     states.left = pressed;
                     used = true;
                 }
 
                 if event.code == right_bind {
-                    if pressed && !states.right && !find_keycodes {
-                        transmitter.send(2).unwrap();
+                    if !find_keycodes {
+                        transmitter.send(2 + pressed as i32).unwrap();
                     }
                     states.right = pressed;
                     used = true;
@@ -199,12 +199,13 @@ impl State {
             } else {
                 receiver.recv().ok()
             } {
-                if recv == 1 {
-                    toggle.left = !toggle.left;
-                }
-                if recv == 2 {
-                    toggle.right = !toggle.right;
-                }
+                match recv {
+                    0 => toggle.left = false,
+                    1 => toggle.left = true,
+                    2 => toggle.right = false,
+                    3 => toggle.right = true,
+                    _ => ()
+                };
 
                 if beep {
                     // ansi beep sound
